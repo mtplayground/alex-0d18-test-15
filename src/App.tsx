@@ -1,5 +1,7 @@
 import { PlainTextEditor } from './components/PlainTextEditor'
+import { StatusBar } from './components/StatusBar'
 import { useLocalStorage } from './hooks/useLocalStorage'
+import { countTodos } from './lib/countTodos'
 
 const TODOS_STORAGE_KEY = 'todos:text'
 
@@ -7,6 +9,7 @@ function App() {
   const [todosText, setTodosText] = useLocalStorage(TODOS_STORAGE_KEY, '', {
     debounceMs: 300,
   })
+  const todoCount = countTodos(todosText)
 
   return (
     <main
@@ -24,10 +27,7 @@ function App() {
         <PlainTextEditor value={todosText} onChange={setTodosText} />
       </section>
 
-      <footer
-        className="h-12 shrink-0 border-t border-zinc-200 bg-white px-4 sm:px-6 lg:px-8"
-        aria-label="底部状态栏"
-      />
+      <StatusBar todoCount={todoCount} />
     </main>
   )
 }
