@@ -6,10 +6,27 @@ import { countTodos } from './lib/countTodos'
 const TODOS_STORAGE_KEY = 'todos:text'
 
 function App() {
-  const [todosText, setTodosText] = useLocalStorage(TODOS_STORAGE_KEY, '', {
-    debounceMs: 300,
-  })
+  const [todosText, setTodosText, clearTodosText] = useLocalStorage(
+    TODOS_STORAGE_KEY,
+    '',
+    {
+      debounceMs: 300,
+    },
+  )
   const todoCount = countTodos(todosText)
+  const canClear = todosText.length > 0
+
+  function handleClearTodos() {
+    if (!canClear) {
+      return
+    }
+
+    const shouldClear = window.confirm('确定清空全部待办？')
+
+    if (shouldClear) {
+      clearTodosText()
+    }
+  }
 
   return (
     <main
@@ -27,7 +44,11 @@ function App() {
         <PlainTextEditor value={todosText} onChange={setTodosText} />
       </section>
 
-      <StatusBar todoCount={todoCount} />
+      <StatusBar
+        canClear={canClear}
+        todoCount={todoCount}
+        onClear={handleClearTodos}
+      />
     </main>
   )
 }
