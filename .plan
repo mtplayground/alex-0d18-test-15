@@ -1,0 +1,38 @@
+# Architecture Plan
+
+Product context: `alex-0d18-test-15` from `README.md`; no `PRODUCT.md` is present in the repository. The issues define a browser-based plain-text todo editor where each non-empty line is one todo item.
+
+## Module Structure
+
+- `src/main.tsx`: React entry point, imports global styles and renders `App`.
+- `src/App.tsx`: top-level page composition and shared editor state wiring.
+- `src/components/PlainTextEditor.tsx`: controlled full-screen `textarea`; emits text changes and receives persisted value.
+- `src/components/StatusBar.tsx`: bottom bar showing the count of non-empty todo lines.
+- `src/components/ClearButton.tsx`: clear action with a second confirmation step before deleting content.
+- `src/hooks/useLocalStorage.ts`: generic persistence hook supporting initial read, debounced writes, string/JSON values, and parse fallback.
+- `src/lib/countTodos.ts`: pure non-empty line counting utility, shared by UI and tests.
+- `src/styles/index.css`: Tailwind base plus application-level global styles.
+- `tests/` or colocated `*.test.ts(x)`: Vitest unit tests for persistence and count logic.
+- `e2e/`: Playwright specs for edit, save, refresh, and clear flow.
+
+## Issue Dependencies
+
+- Issue #1 creates the Vite + React + TypeScript foundation and removes template noise.
+- Issues #2 and #3 build on #1 by adding Tailwind/layout and lint/format/env conventions.
+- Issue #4 depends on the initialized project and provides the persistence primitive.
+- Issue #5 depends on Tailwind layout and `useLocalStorage`; it introduces the central editor state.
+- Issues #6 and #7 depend on the editor state from #5 and add status/counting plus clear behavior.
+- Issue #8 depends on `useLocalStorage` and count utilities being extracted into testable modules.
+- Issue #9 depends on the integrated UI, localStorage behavior, and clear flow.
+- Issue #10 depends on the app being buildable and documented deployment behavior being stable.
+
+## Key Decisions
+
+- Keep todo data as a single persisted text string, not an array, because the product is explicitly a pure text editor where each line is one todo.
+- Extract `countTodos(text)` as a framework-free function so UI, unit tests, and future behavior changes share one definition of "todo count".
+- Use a stable localStorage key such as `alex-0d18-test-15:todos` to avoid collisions while preserving the repository/product identity.
+- Implement debounced writes in the hook or editor integration, while keeping displayed text controlled and immediate.
+- Prefer native `window.confirm` for the first clear implementation unless the UI issue explicitly asks for a custom dialog; it is simple, accessible, and easy to cover in E2E tests.
+- Keep environment variables optional and documented through `.env.example`; no secrets are required for the initial static app.
+- Use Vite/Vitest/React Testing Library for unit coverage and Playwright for the browser persistence workflow.
+- Document self-hosting as static file hosting of `dist/` after `npm run build`; no server runtime should be required.
